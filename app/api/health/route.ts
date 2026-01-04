@@ -8,8 +8,10 @@ export async function GET() {
     env: {
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'configured' : 'missing',
       supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'configured' : 'missing',
+      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configured' : 'missing',
       twilioSid: process.env.TWILIO_ACCOUNT_SID ? 'configured' : 'missing',
       appUrl: process.env.NEXT_PUBLIC_APP_URL,
+      adminPassword: process.env.ADMIN_PASSWORD ? 'configured' : 'missing',
     },
     database: {
       connection: 'unknown',
