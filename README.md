@@ -137,12 +137,12 @@ See `RAILWAY_SETUP.md` for detailed instructions.
 2. Set environment variables in Railway dashboard
 3. Enable PR preview deployments
 4. Push to main branch to deploy
-5. Set the Railway health check path to `/api/health` (Project → Settings → Deployments → Health Checks) so deployments fail fast if required environment variables are missing or the database is unreachable.
+5. Set the Railway health check path to `/api/health` (Project → Settings → Deployments → Health Checks) so deployments fail fast if required environment variables are missing or the basic database connectivity check fails.
 
 ### Health check endpoint
 
-- `GET /api/health` validates required environment variables (Supabase, Twilio, admin password, and public URLs) **before** creating any clients, then probes database connectivity.
-- Returns `200` when everything is configured; returns `500` with a list of missing variables or database errors to guide fixes during deployment.
+- `GET /api/health` validates that required environment variables (Supabase, Twilio, admin password, and public URLs) are present **before** attempting any external calls, then performs a simple database connectivity probe using the configured Supabase credentials.
+- Returns `200` when all required variables are present and the database is reachable; returns `500` with a list of missing variables or database errors to guide fixes during deployment.
 
 ## Admin Dashboard
 
