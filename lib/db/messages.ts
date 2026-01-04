@@ -1,4 +1,4 @@
-import { supabase, Message } from '@/lib/supabase';
+import { getSupabaseClient, type Message } from '@/lib/supabase';
 import { formatPhoneNumber } from '@/lib/utils';
 
 /**
@@ -10,6 +10,7 @@ export async function sendMessage(
   content: string
 ): Promise<Message | null> {
   try {
+    const supabase = getSupabaseClient();
     const formattedPhone = formatPhoneNumber(senderPhone);
 
     const { data, error } = await supabase
@@ -39,6 +40,7 @@ export async function sendMessage(
  */
 export async function getMessages(nominationId: string): Promise<Message[]> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('messages')
       .select('*')
@@ -59,6 +61,8 @@ export function subscribeToMessages(
   nominationId: string,
   callback: (message: Message) => void
 ) {
+  const supabase = getSupabaseClient();
+
   return supabase
     .channel(`messages:${nominationId}`)
     .on(
@@ -81,6 +85,7 @@ export function subscribeToMessages(
  */
 export async function getMessageCount(nominationId: string): Promise<number> {
   try {
+    const supabase = getSupabaseClient();
     const { count } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })

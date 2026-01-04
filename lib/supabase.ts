@@ -1,22 +1,51 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { requireEnvVar } from './env';
 
-// Client-side Supabase client (uses anon key)
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+let supabaseClient: SupabaseClient | null = null;
+let supabaseAdminClient: SupabaseClient | null = null;
 
-// Server-side Supabase client (uses service role key for admin operations)
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function createSupabaseClient(): SupabaseClient {
+  const supabaseUrl = requireEnvVar('NEXT_PUBLIC_SUPABASE_URL', {
+    description: 'Supabase project URL',
+  });
+  const supabaseAnonKey = requireEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY', {
+    description: 'Supabase anon public API key',
+  });
+
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
+function createSupabaseAdminClient(): SupabaseClient {
+  const supabaseUrl = requireEnvVar('NEXT_PUBLIC_SUPABASE_URL', {
+    description: 'Supabase project URL',
+  });
+  const supabaseServiceKey = requireEnvVar('SUPABASE_SERVICE_ROLE_KEY', {
+    description: 'Supabase service role key (keep this secret)',
+  });
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
+  });
+}
+
+export function getSupabaseClient(): SupabaseClient {
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseClient();
   }
-);
+
+  return supabaseClient;
+}
+
+export function getSupabaseAdminClient(): SupabaseClient {
+  if (!supabaseAdminClient) {
+    supabaseAdminClient = createSupabaseAdminClient();
+  }
+
+  return supabaseAdminClient;
+}
 
 // Database types
 export interface User {

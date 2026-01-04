@@ -1,18 +1,82 @@
-import twilio from 'twilio';
+import twilio, { type Twilio } from 'twilio';
+import { getEnvVar } from './env';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID!;
-const authToken = process.env.TWILIO_AUTH_TOKEN!;
-const verifySid = process.env.TWILIO_VERIFY_SERVICE_SID!;
+type TwilioConfig = {
+  accountSid: string;
+  authToken: string;
+  verifySid: string;
+  fromNumber: string;
+};
 
-const client = twilio(accountSid, authToken);
+let client: Twilio | null = null;
+let config: TwilioConfig | null = null;
+
+function loadTwilioConfig(): TwilioConfig {
+  if (config) return config;
+
+  const accountSid = getEnvVar('TWILIO_ACCOUNT_SID', {
+    optional: true,
+    description: 'Twilio Account SID',
+  });
+  const authToken = getEnvVar('TWILIO_AUTH_TOKEN', {
+    optional: true,
+    description: 'Twilio Auth Token',
+  });
+  const verifySid = getEnvVar('TWILIO_VERIFY_SERVICE_SID', {
+    optional: true,
+    description: 'Twilio Verify Service SID',
+  });
+  const fromNumber =
+    getEnvVar('TWILIO_PHONE_NUMBER', {
+      fallback: '+12025551234',
+      description: 'Twilio sender number',
+    }) || '+12025551234';
+
+  if (!accountSid || !authToken || !verifySid) {
+    throw new Error(
+      'Twilio credentials are missing (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID).'
+    );
+  }
+
+  config = {
+    accountSid,
+    authToken,
+    verifySid,
+    fromNumber,
+  };
+
+  return config;
+}
+
+function getTwilioClient(): { client: Twilio; config: TwilioConfig } | null {
+  try {
+    const resolvedConfig = loadTwilioConfig();
+
+    if (!client) {
+      client = twilio(resolvedConfig.accountSid, resolvedConfig.authToken);
+    }
+
+    return { client, config: resolvedConfig };
+  } catch (error) {
+    console.error(
+      '[twilio] Twilio configuration error:',
+      error instanceof Error ? error.message : error
+    );
+    return null;
+  }
+}
 
 /**
  * Send verification code to phone number
  */
 export async function sendVerificationCode(phoneNumber: string): Promise<boolean> {
   try {
-    const verification = await client.verify.v2
-      .services(verifySid)
+    const twilioClient = getTwilioClient();
+
+    if (!twilioClient) return false;
+
+    const verification = await twilioClient.client.verify.v2
+      .services(twilioClient.config.verifySid)
       .verifications.create({
         to: phoneNumber,
         channel: 'sms',
@@ -30,8 +94,12 @@ export async function sendVerificationCode(phoneNumber: string): Promise<boolean
  */
 export async function verifyCode(phoneNumber: string, code: string): Promise<boolean> {
   try {
-    const verificationCheck = await client.verify.v2
-      .services(verifySid)
+    const twilioClient = getTwilioClient();
+
+    if (!twilioClient) return false;
+
+    const verificationCheck = await twilioClient.client.verify.v2
+      .services(twilioClient.config.verifySid)
       .verificationChecks.create({
         to: phoneNumber,
         code: code,
@@ -49,10 +117,14 @@ export async function verifyCode(phoneNumber: string, code: string): Promise<boo
  */
 export async function sendSMS(to: string, message: string): Promise<boolean> {
   try {
-    await client.messages.create({
+    const twilioClient = getTwilioClient();
+
+    if (!twilioClient) return false;
+
+    await twilioClient.client.messages.create({
       body: message,
       to: to,
-      from: process.env.TWILIO_PHONE_NUMBER || '+12025551234', // You'll need to set this
+      from: twilioClient.config.fromNumber,
     });
 
     return true;
