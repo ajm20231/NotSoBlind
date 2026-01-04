@@ -52,6 +52,28 @@ const requiredEnv: EnvCheck[] = [
 ];
 
 export async function GET() {
+  // Build env diagnostics and track missing vars in a single pass
+  const missingEnv: EnvCheck[] = [];
+  const env = requiredEnv.reduce<
+    Record<
+      EnvKey,
+      | { status: 'configured' }
+      | {
+          status: 'missing';
+          message: string;
+        }
+    >
+  >((acc, envCheck) => {
+    const { key, message } = envCheck;
+    if (process.env[key]) {
+      acc[key] = { status: 'configured' };
+    } else {
+      acc[key] = { status: 'missing', message };
+      missingEnv.push(envCheck);
+    }
+    return acc;
+  }, {} as Record<EnvKey, { status: 'configured' } | { status: 'missing'; message: string }>);
+
   const diagnostics: {
     server: string;
     timestamp: string;
@@ -73,30 +95,12 @@ export async function GET() {
   } = {
     server: 'ok',
     timestamp: new Date().toISOString(),
-    env: {},
+    env,
     database: {
       connection: 'unknown',
       tables: [] as string[],
     },
   };
-
-  const missingEnv = requiredEnv.filter(({ key }) => !process.env[key]);
-
-  diagnostics.env = requiredEnv.reduce<
-    Record<
-      EnvKey,
-      | { status: 'configured' }
-      | {
-          status: 'missing';
-          message: string;
-        }
-    >
-  >((acc, { key, message }) => {
-    acc[key] = process.env[key]
-      ? { status: 'configured' }
-      : { status: 'missing', message };
-    return acc;
-  }, {} as Record<EnvKey, { status: 'configured' } | { status: 'missing'; message: string }>);
 
   if (missingEnv.length > 0) {
     return NextResponse.json(
