@@ -42,7 +42,7 @@ NEXT_PUBLIC_APP_URL=${{ RAILWAY_PUBLIC_DOMAIN }}
 
 ## Health check
 
-Set the service health check path to `/api/health` in Railway (Project → Settings → Deployments → Health Checks). This endpoint validates required environment variables and database connectivity so deployments fail fast when configuration is incomplete.
+Set the service health check path to `/api/health` in Railway (Project → Settings → Deployments → Health Checks). This endpoint validates that Supabase environment variables are present and tests database connectivity so deployments fail fast when the database cannot be reached.
 
 ## Custom Domain (Optional)
 

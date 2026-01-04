@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-type EnvKey =
-  | 'NEXT_PUBLIC_SUPABASE_URL'
-  | 'NEXT_PUBLIC_SUPABASE_ANON_KEY'
-  | 'SUPABASE_SERVICE_ROLE_KEY'
-  | 'NEXT_PUBLIC_APP_URL'
-  | 'TWILIO_ACCOUNT_SID'
-  | 'TWILIO_AUTH_TOKEN'
-  | 'TWILIO_VERIFY_SERVICE_SID'
-  | 'ADMIN_PASSWORD';
+type EnvKey = 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY';
 
 type EnvCheck = {
   key: EnvKey;
@@ -25,44 +17,12 @@ const requiredEnv: EnvCheck[] = [
     key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     message: 'Set NEXT_PUBLIC_SUPABASE_ANON_KEY to your Supabase anon API key.',
   },
-  {
-    key: 'SUPABASE_SERVICE_ROLE_KEY',
-    message: 'Set SUPABASE_SERVICE_ROLE_KEY to your Supabase service role key.',
-  },
-  {
-    key: 'NEXT_PUBLIC_APP_URL',
-    message: 'Set NEXT_PUBLIC_APP_URL to the public URL of this deployment.',
-  },
-  {
-    key: 'TWILIO_ACCOUNT_SID',
-    message: 'Add TWILIO_ACCOUNT_SID from your Twilio console.',
-  },
-  {
-    key: 'TWILIO_AUTH_TOKEN',
-    message: 'Add TWILIO_AUTH_TOKEN from your Twilio console.',
-  },
-  {
-    key: 'TWILIO_VERIFY_SERVICE_SID',
-    message: 'Add TWILIO_VERIFY_SERVICE_SID for your Verify service.',
-  },
-  {
-    key: 'ADMIN_PASSWORD',
-    message: 'Set ADMIN_PASSWORD to secure the admin dashboard.',
-  },
 ];
 
 export async function GET() {
   const diagnostics: {
     server: string;
     timestamp: string;
-    env: Record<
-      EnvKey,
-      | { status: 'configured' }
-      | {
-          status: 'missing';
-          message: string;
-        }
-    >;
     database: {
       connection: 'unknown' | 'ok' | 'error';
       tables: string[];
@@ -73,37 +33,21 @@ export async function GET() {
   } = {
     server: 'ok',
     timestamp: new Date().toISOString(),
-    env: {},
     database: {
       connection: 'unknown',
       tables: [] as string[],
     },
   };
 
+  // Check only the environment variables actually used by this health check
   const missingEnv = requiredEnv.filter(({ key }) => !process.env[key]);
-
-  diagnostics.env = requiredEnv.reduce<
-    Record<
-      EnvKey,
-      | { status: 'configured' }
-      | {
-          status: 'missing';
-          message: string;
-        }
-    >
-  >((acc, { key, message }) => {
-    acc[key] = process.env[key]
-      ? { status: 'configured' }
-      : { status: 'missing', message };
-    return acc;
-  }, {} as Record<EnvKey, { status: 'configured' } | { status: 'missing'; message: string }>);
 
   if (missingEnv.length > 0) {
     return NextResponse.json(
       {
         ...diagnostics,
         error: {
-          message: 'Missing required environment variables. Update your deployment configuration and redeploy.',
+          message: 'Missing required environment variables for database connectivity check.',
           missing: missingEnv.map(({ key, message }) => ({ key, guidance: message })),
         },
       },
