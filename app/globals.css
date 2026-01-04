@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-charcoal-plum text-moonstone-gray;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent pure white, use moonstone-gray instead */
+  * {
+    @apply selection:bg-smoked-rosewood selection:text-moonstone-gray;
+  }
+}
+
+@layer components {
+  /* Glass panel effect */
+  .glass-panel {
+    background: rgba(30, 26, 34, 0.55);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Primary CTA button */
+  .btn-primary {
+    @apply bg-smoked-rosewood text-moonstone-gray px-6 py-3 rounded-lg font-medium;
+    @apply transition-all duration-200;
+    @apply hover:shadow-glow-amber;
+  }
+
+  /* Secondary CTA button */
+  .btn-secondary {
+    @apply bg-transparent text-candle-amber px-6 py-3 rounded-lg font-medium;
+    @apply border border-candle-amber;
+    @apply transition-all duration-200;
+    @apply hover:bg-candle-amber hover:bg-opacity-10;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply glass-panel px-4 py-3 rounded-lg;
+    @apply text-moonstone-gray placeholder-moonstone-gray placeholder-opacity-50;
+    @apply focus:outline-none focus:ring-2 focus:ring-candle-amber focus:ring-opacity-30;
+    @apply transition-all duration-200;
+  }
+
+  /* Glow effect for highlights */
+  .glow-amber {
+    @apply shadow-glow-amber;
+  }
+}
