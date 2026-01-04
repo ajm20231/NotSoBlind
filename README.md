@@ -138,6 +138,11 @@ See `RAILWAY_SETUP.md` for detailed instructions.
 3. Enable PR preview deployments
 4. Push to main branch to deploy
 
+**Health check**
+
+- Configure Railway's health check to `/api/health` so deployments fail fast when required env vars or database migrations are missing.
+- The endpoint validates Supabase and Twilio env vars before opening connections and returns a 500 with actionable messages if anything is misconfigured.
+
 ## Admin Dashboard
 
 Access at `/admin` with the password set in `ADMIN_PASSWORD` env var.

@@ -33,6 +33,10 @@ NEXT_PUBLIC_ENV=staging
 NEXT_PUBLIC_APP_URL=${{ RAILWAY_PUBLIC_DOMAIN }}
 ```
 
+## Health Check
+
+Set the Railway health check path to `/api/health`. The endpoint verifies required environment variables (Supabase, Twilio, app URL, admin password) before creating clients and checks database connectivity/migrations. Deployments will fail fast with a 500 response if anything is missing or misconfigured.
+
 ## PR Preview Setup
 
 1. Go to Railway project → Settings
