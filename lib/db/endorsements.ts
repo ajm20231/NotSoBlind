@@ -1,4 +1,4 @@
-import { supabase, Endorsement } from '@/lib/supabase';
+import { getSupabaseClient, type Endorsement } from '@/lib/supabase';
 import { formatPhoneNumber } from '@/lib/utils';
 
 /**
@@ -10,6 +10,7 @@ export async function createEndorsement(
   isPositive: boolean
 ): Promise<Endorsement | null> {
   try {
+    const supabase = getSupabaseClient();
     const formattedPhone = formatPhoneNumber(endorserPhone);
 
     // Check if already endorsed
@@ -52,6 +53,7 @@ export async function createEndorsement(
  */
 export async function hasEndorsed(nominationId: string, endorserPhone: string): Promise<boolean> {
   try {
+    const supabase = getSupabaseClient();
     const formattedPhone = formatPhoneNumber(endorserPhone);
 
     const { data } = await supabase
@@ -72,6 +74,7 @@ export async function hasEndorsed(nominationId: string, endorserPhone: string): 
  */
 export async function getEndorsements(nominationId: string): Promise<Endorsement[]> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('endorsements')
       .select('*')

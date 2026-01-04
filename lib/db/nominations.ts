@@ -1,4 +1,8 @@
-import { supabase, supabaseAdmin, Nomination } from '@/lib/supabase';
+import {
+  getSupabaseAdminClient,
+  getSupabaseClient,
+  type Nomination
+} from '@/lib/supabase';
 import { formatPhoneNumber } from '@/lib/utils';
 
 /**
@@ -27,6 +31,7 @@ export async function createNomination(params: {
   rationale: string;
 }): Promise<Nomination | null> {
   try {
+    const supabase = getSupabaseClient();
     const { nominatorId, personAPhone, personAName, personBPhone, personBName, rationale } = params;
 
     // Format phone numbers
@@ -95,6 +100,7 @@ export async function createNomination(params: {
  */
 export async function getNominationByToken(token: string): Promise<Nomination | null> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('nominations')
       .select('*')
@@ -113,6 +119,7 @@ export async function getNominationByToken(token: string): Promise<Nomination | 
  */
 export async function getNominationById(id: string): Promise<Nomination | null> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('nominations')
       .select('*')
@@ -135,6 +142,7 @@ export async function getEndorsementCounts(nominationId: string): Promise<{
   meetsThreshold: boolean;
 }> {
   try {
+    const supabase = getSupabaseClient();
     const { data: endorsements } = await supabase
       .from('endorsements')
       .select('is_positive')
@@ -167,6 +175,7 @@ export async function submitOutcome(
   outcome: 'talked' | 'dated' | 'nothing'
 ): Promise<boolean> {
   try {
+    const supabase = getSupabaseClient();
     const { error } = await supabase
       .from('nominations')
       .update({
@@ -188,6 +197,7 @@ export async function submitOutcome(
  */
 export async function getAllNominations(): Promise<Nomination[]> {
   try {
+    const supabaseAdmin = getSupabaseAdminClient();
     const { data, error } = await supabaseAdmin
       .from('nominations')
       .select('*')

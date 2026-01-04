@@ -1,10 +1,15 @@
-import { supabase, supabaseAdmin, User } from '@/lib/supabase';
+import {
+  getSupabaseAdminClient,
+  getSupabaseClient,
+  type User
+} from '@/lib/supabase';
 
 /**
  * Get or create user by phone number
  */
 export async function getOrCreateUser(phone: string, firstName: string): Promise<User | null> {
   try {
+    const supabase = getSupabaseClient();
     // Check if user exists
     const { data: existingUser } = await supabase
       .from('users')
@@ -40,6 +45,7 @@ export async function getOrCreateUser(phone: string, firstName: string): Promise
  */
 export async function getUserByPhone(phone: string): Promise<User | null> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -58,6 +64,7 @@ export async function getUserByPhone(phone: string): Promise<User | null> {
  */
 export async function getUserById(id: string): Promise<User | null> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -84,6 +91,7 @@ export async function isUserBanned(phone: string): Promise<boolean> {
  */
 export async function banUser(phone: string): Promise<boolean> {
   try {
+    const supabaseAdmin = getSupabaseAdminClient();
     const { error } = await supabaseAdmin
       .from('users')
       .update({ is_banned: true })

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { subscribeToMessages } from '@/lib/db/messages';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface Message {
   id: string;
@@ -27,6 +27,8 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
+
     loadChat();
 
     // Subscribe to new messages
