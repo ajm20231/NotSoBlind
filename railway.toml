@@ -5,3 +5,4 @@ builder = "nixpacks"
 startCommand = "node .next/standalone/server.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
+healthcheckPath = "/api/health"

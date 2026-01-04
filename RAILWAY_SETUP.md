@@ -40,6 +40,10 @@ NEXT_PUBLIC_APP_URL=${{ RAILWAY_PUBLIC_DOMAIN }}
 3. Enable "Deploy on PR"
 4. Railway will automatically comment on PRs with preview URLs
 
+## Health check
+
+Set the service health check path to `/api/health` in Railway (Project → Settings → Deployments → Health Checks). The provided `railway.toml` already sets this path, but verify it is reflected in your project settings. This endpoint validates required environment variables and database connectivity so deployments fail fast when configuration is incomplete.
+
 ## Custom Domain (Optional)
 
 1. Go to Settings → Domains
